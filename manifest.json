@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Prime Video Ad Hunter",
+  "version": "1",
+  "description": "Auto-fast-forwards ads by detecting top-screen countdowns.",
+  "permissions": [
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://www.amazon.com/*",
+    "https://www.primevideo.com/*",
+    "https://www.amazon.co.uk/*",
+    "https://www.amazon.de/*",
+    "https://www.amazon.jp/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.amazon.com/*/video/*",
+        "https://www.primevideo.com/*",
+        "https://www.amazon.co.uk/*/video/*",
+        "https://www.amazon.de/*/video/*",
+        "https://www.amazon.jp/*/video/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
