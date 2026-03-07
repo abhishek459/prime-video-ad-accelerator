@@ -26,8 +26,23 @@
         return null;
     }
 
+    // Helper: Find the largest video on the screen to avoid sidebar thumbnails
+    function getMainVideo() {
+        const videos = Array.from(document.querySelectorAll('video'));
+        if (videos.length === 0) return null;
+
+        // Sort videos by their on-screen area (largest first)
+        videos.sort((a, b) => {
+            const areaA = a.clientWidth * a.clientHeight;
+            const areaB = b.clientWidth * b.clientHeight;
+            return areaB - areaA; // Descending order
+        });
+
+        return videos[0]; // Return the biggest one
+    }
+
     function gameLoop() {
-        const video = document.querySelector('video');
+        const video = getMainVideo();
         let nextTick = SCAN_INTERVAL_MS;
 
         if (video) {
@@ -41,40 +56,41 @@
                 if (Date.now() - skipStartTime > MAX_SKIP_TIME_MS) {
                     console.log("[Ad Hunter] Emergency Brake! Skipping ran too long.");
                     stopSkipping(video);
-                    return; // Restart loop next tick
+                    nextTick = SCAN_INTERVAL_MS; // Slow down scanning again
                 }
-
                 // 2. VALIDATE THE TIMER
                 // Check if our detected timer is still VALID (Visible AND still looks like a time)
-                let adTimerIsValid = false;
+                else {
+                    let adTimerIsValid = false;
 
-                for (let [element, data] of suspectElements) {
-                    if (data.confirmedAd) {
-                        // CHECK A: Is it still in the DOM?
-                        if (!element.isConnected) continue;
+                    for (let [element, data] of suspectElements) {
+                        if (data.confirmedAd) {
+                            // CHECK A: Is it still in the DOM?
+                            if (!element.isConnected) continue;
 
-                        // CHECK B: Is it actually visible? (offsetParent is null if hidden)
-                        if (element.offsetParent === null) continue;
+                            // CHECK B: Is it actually visible? (offsetParent is null if hidden)
+                            if (element.offsetParent === null) continue;
 
-                        // CHECK C: Does it still contain a number? 
-                        // If it changed to "Skip Intro" or empty string, it's not an ad timer anymore.
-                        const currentTime = parseTime(element.textContent);
-                        if (currentTime === null) continue;
+                            // CHECK C: Does it still contain a number? 
+                            // If it changed to "Skip Intro" or empty string, it's not an ad timer anymore.
+                            const currentTime = parseTime(element.textContent);
+                            if (currentTime === null) continue;
 
-                        // If we passed all checks, the Ad is still active.
-                        adTimerIsValid = true;
-                        break;
+                            // If we passed all checks, the Ad is still active.
+                            adTimerIsValid = true;
+                            break;
+                        }
                     }
-                }
 
-                if (!adTimerIsValid) {
-                    // The timer is gone/hidden/changed. Ad is over.
-                    stopSkipping(video);
-                    nextTick = SCAN_INTERVAL_MS; // Slow down
-                } else {
-                    // Ad is still happening. Enforce speed.
-                    if (video.playbackRate !== SPEED_MULTIPLIER) {
-                        video.playbackRate = SPEED_MULTIPLIER;
+                    if (!adTimerIsValid) {
+                        // The timer is gone/hidden/changed. Ad is over.
+                        stopSkipping(video);
+                        nextTick = SCAN_INTERVAL_MS;
+                    } else {
+                        // Ad is still happening. Enforce speed.
+                        if (video.playbackRate !== SPEED_MULTIPLIER) {
+                            video.playbackRate = SPEED_MULTIPLIER;
+                        }
                     }
                 }
             }
@@ -142,6 +158,6 @@
 
     // Start
     gameLoop();
-    console.log("[Ad Hunter] v1.2 Loaded - Strict Mode");
+    console.log("[Ad Hunter] v1.3 Loaded - Strict Mode + SPA Fixes");
 
 })();
