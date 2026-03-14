@@ -4,7 +4,7 @@
     // --- CONFIGURATION ---
     const SCAN_INTERVAL_MS = 1000;    // Scan slowly for ads
     const AD_MODE_INTERVAL_MS = 50;   // Check fast when skipping
-    const SPEED_MULTIPLIER = 16.0;
+    const SPEED_MULTIPLIER = 8.0;
     const MAX_AD_DURATION_SEC = 180;  // Ignore timers > 3 mins
     const SCREEN_SEARCH_AREA = 0.30;  // Only check top 30% of screen (ignores bottom player bar)
     const MAX_SKIP_TIME_MS = 60000;   // EMERGENCY BRAKE: Never skip more than 60s continuously
